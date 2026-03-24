@@ -1,52 +1,67 @@
 'use client';
-import Footer from 'src/components/Footer';
-import TransactionWrapper from 'src/components/TransactionWrapper';
-import WalletWrapper from 'src/components/WalletWrapper';
-import { ONCHAINKIT_LINK } from 'src/links';
-import OnchainkitSvg from 'src/svg/OnchainkitSvg';
-import { useAccount } from 'wagmi';
-import LoginButton from '../components/LoginButton';
-import SignupButton from '../components/SignupButton';
 
-export default function Page() {
+import { ConnectWallet, Transaction, TransactionButton } from '@coinbase/onchainkit';
+import { useAccount } from 'wagmi';
+import { useState } from 'react';
+
+const CONTRACT_ADDRESS = " 0x4763F996547F54BC6eA834746B9fe4d250FabEBA";   // ← CHANGE THIS
+const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";  // Base USDC
+
+export default function GhostRecover() {
   const { address } = useAccount();
+  const [status, setStatus] = useState("");
 
   return (
-    <div className="flex h-full w-96 max-w-full flex-col px-1 md:w-[1008px]">
-      <section className="mt-6 mb-6 flex w-full flex-col md:flex-row">
-        <div className="flex w-full flex-row items-center justify-between gap-2 md:gap-0">
-          <a
-            href={ONCHAINKIT_LINK}
-            title="onchainkit"
-            target="_blank"
-            rel="noreferrer"
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 font-mono overflow-hidden">
+      {/* Badass Header */}
+      <div className="text-center mb-12">
+        <h1 className="text-7xl font-black text-red-600 tracking-tighter mb-2">
+          GHOSTRECOVER 👻🦁
+        </h1>
+        <p className="text-2xl text-zinc-400">The Ghost drags your stuck funds home.</p>
+        <p className="text-lg text-red-500 mt-2">Fair 8% fee to the pride • Base only</p>
+      </div>
+
+      <ConnectWallet />
+
+      {address && (
+        <div className="mt-12 w-full max-w-md">
+          <Transaction
+            calls={[
+              {
+                address: CONTRACT_ADDRESS,
+                abi: [
+                  {
+                    "inputs": [
+                      { "name": "token", "type": "address" },
+                      { "name": "to", "type": "address" }
+                    ],
+                    "name": "rescueToken",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                  }
+                ],
+                functionName: "rescueToken",
+                args: [USDC_ADDRESS, address],
+              }
+            ]}
+            onError={(error) => setStatus("Error: " + error.message)}
+            onSuccess={() => setStatus("✅ Ghost dragged your funds home! 8% to the pride.")}
           >
-            <OnchainkitSvg />
-          </a>
-          <div className="flex items-center gap-3">
-            <SignupButton />
-            {!address && <LoginButton />}
-          </div>
+            <TransactionButton className="w-full bg-red-600 hover:bg-red-700 border-4 border-red-500 text-white font-black text-3xl py-8 rounded-2xl shadow-2xl shadow-red-900 transition-all">
+              GHOST IT 👻🦁
+            </TransactionButton>
+          </Transaction>
+
+          {status && <p className="mt-6 text-center text-lg">{status}</p>}
         </div>
-      </section>
-      <section className="templateSection flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-gray-100 px-2 py-4 md:grow">
-        <div className="flex h-[450px] w-[450px] max-w-full items-center justify-center rounded-xl bg-[#030712]">
-          <div className="rounded-xl bg-[#F3F4F6] px-4 py-[11px]">
-            <p className="font-normal text-indigo-600 text-xl not-italic tracking-[-1.2px]">
-              npm install @coinbase/onchainkit
-            </p>
-          </div>
-        </div>
-        {address ? (
-          <TransactionWrapper address={address} />
-        ) : (
-          <WalletWrapper
-            className="w-[450px] max-w-full"
-            text="Sign in to transact"
-          />
-        )}
-      </section>
-      <Footer />
+      )}
+
+      <div className="mt-16 text-center text-xs text-zinc-500 max-w-xs">
+        Paste an old address or send dust to the contract first if needed.<br />
+        One click rescue • Sponsored gas vibes • Pride eats 8%
+      </div>
     </div>
   );
 }
