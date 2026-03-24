@@ -6,7 +6,7 @@ import { useWriteContract } from 'wagmi';
 import { parseAbi } from 'viem';
 import { useState } from 'react';
 
-const CONTRACT_ADDRESS = "0xYOUR_REAL_CONTRACT_ADDRESS_HERE"; // ← CHANGE THIS TO YOUR VERIFIED CONTRACT
+const CONTRACT_ADDRESS = "0x4763F996547F54BC6eA834746B9fe4d250FabEBA"; // ← CHANGE THIS TO YOUR VERIFIED CONTRACT
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
 const RESCUE_ABI = parseAbi([
